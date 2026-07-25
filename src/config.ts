@@ -16,10 +16,24 @@ export const config = {
   // ~5 min and repeat loads are instant. New form responses appear within a few
   // minutes (Google's publish refresh interval).
   csvUrl:
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl4L0RFkLX5xrr3X3CXcs5pQUBk4Q2BG-ORm90yt8-czXZlTz3E7flpSUb-Q2vmLzC4uURw2OLRZQ5/pub?gid=965940565&single=true&output=csv",
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl4L0RFkLX5xrr3X3CXcs5pQUBk4Q2BG-ORm90yt8-czXZlTz3E7flpSUb-Q2vmLzC4uURw2OLRZQ5/pub?gid=437656259&single=true&output=csv",
+
+  // Optional: published CSV (File -> Share -> Publish to web -> CSV) of a
+  // separate "covers" sheet that maps a book name to a cover image link.
+  // Leave empty to disable covers (every book uses its colored tile).
+  coversCsvUrl:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn2ecMWh1sS8oo80YGQxdw8HryCTHG7CMBXsuchN_48dNV2PltK_IgPvrl3sPSo9ODtwiRdp-6eh65/pub?gid=0&single=true&output=csv",
 
   // How many book cards to show per "page" before "load more".
   pageSize: 24,
+} as const;
+
+// Column headers in the covers sheet. `book` must match the book title as it
+// appears in the reviews (matching is whitespace/case-insensitive). `cover`
+// holds the image link (a Google Drive share link or any direct image URL).
+export const COVERS_HEADER_MAP = {
+  book: "שם ספר",
+  cover: "לינק",
 } as const;
 
 // Maps the sheet's Hebrew column headers to internal field names. If your form

@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookCard } from "../components/BookCard";
 import { config } from "../config";
-import { fetchFreshReviews, getCachedReviews, groupByBook } from "../data";
+import {
+  coverForBook,
+  fetchFreshCovers,
+  fetchFreshReviews,
+  getCachedCovers,
+  getCachedReviews,
+  groupByBook,
+} from "../data";
 import { t } from "../strings";
 import type { BookGroup, Review } from "../types";
 
@@ -30,6 +37,9 @@ export function Reviews() {
     "loading",
   );
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [covers, setCovers] = useState<Map<string, string>>(() =>
+    getCachedCovers(),
+  );
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<Scope>("all");
   const [sort, setSort] = useState<Sort>("newest");
@@ -52,6 +62,14 @@ export function Reviews() {
       })
       .catch(() => {
         if (!cached) setStatus("error");
+      });
+
+    fetchFreshCovers()
+      .then((fresh) => {
+        if (fresh.size > 0) setCovers(fresh);
+      })
+      .catch(() => {
+        /* covers are optional */
       });
   }
 
@@ -217,7 +235,11 @@ export function Reviews() {
         <>
           <div className="grid gap-3 sm:grid-cols-2">
             {shown.map((g) => (
-              <BookCard key={g.key} group={g} />
+              <BookCard
+                key={g.key}
+                group={g}
+                coverUrl={coverForBook(covers, g.book)}
+              />
             ))}
           </div>
 

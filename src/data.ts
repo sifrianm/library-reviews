@@ -1,8 +1,9 @@
 import Papa from "papaparse";
-import { config, HEADER_MAP, rankByValue } from "./config";
+import { config, COVERS_HEADER_MAP, HEADER_MAP, rankByValue } from "./config";
 import type { BookGroup, Review } from "./types";
 
 const CACHE_KEY = "library-reviews-cache-v2";
+const COVERS_CACHE_KEY = "library-reviews-covers-v1";
 
 type CacheShape = {
   fetchedAt: number;
@@ -155,8 +156,113 @@ export function fetchFreshReviews(): Promise<Review[]> {
 // Warms the cache in the background (e.g. from the home screen) so the reviews
 // page is ready by the time the user navigates to it. Errors are ignored.
 export function prefetchReviews(): void {
-  if (memReviews) return;
-  fetchFreshReviews().catch(() => {
-    /* will retry when the reviews page loads */
+  if (!memReviews) {
+    fetchFreshReviews().catch(() => {
+      /* will retry when the reviews page loads */
+    });
+  }
+  fetchFreshCovers().catch(() => {});
+}
+
+// --- Book covers (optional second sheet) -----------------------------------
+
+// Normalizes a book title for matching between the two sheets: trims, collapses
+// inner whitespace, and lowercases (harmless for Hebrew, helps mixed text).
+export function normalizeTitle(s: string): string {
+  return s.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+// Turns a Google Drive share link into an embeddable image URL. Any other URL
+// (a direct image link) is returned unchanged.
+export function toImageUrl(raw: string): string {
+  const url = (raw ?? "").trim();
+  if (!url) return "";
+  const id =
+    url.match(/\/file\/d\/([-\w]{20,})/)?.[1] ??
+    url.match(/[?&]id=([-\w]{20,})/)?.[1] ??
+    url.match(/\/d\/([-\w]{20,})/)?.[1];
+  if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w600`;
+  return url;
+}
+
+function coversFromCsv(csv: string): Map<string, string> {
+  const parsed = Papa.parse<Record<string, string>>(csv, {
+    header: true,
+    skipEmptyLines: true,
   });
+  const headers = parsed.meta.fields ?? [];
+
+  // Prefer the configured headers; fall back to detecting sensible columns so a
+  // slightly different header text still works.
+  const bookCol =
+    headers.find((h) => h === COVERS_HEADER_MAP.book) ??
+    headers.find((h) => h.includes("ספר")) ??
+    headers[0];
+  const coverCol =
+    headers.find((h) => h === COVERS_HEADER_MAP.cover) ??
+    headers.find((h) => /קישור|תמונה|כריכה|לינק|link|url|cover/i.test(h));
+
+  const map = new Map<string, string>();
+  for (const row of parsed.data) {
+    const book = (bookCol ? row[bookCol] : "")?.trim() ?? "";
+    let link = (coverCol ? row[coverCol] : "")?.trim() ?? "";
+    // Last resort: any cell that looks like a URL.
+    if (!link) {
+      link = Object.values(row).find((v) => /https?:\/\//.test(v ?? "")) ?? "";
+    }
+    if (!book || !link) continue;
+    map.set(normalizeTitle(book), toImageUrl(link));
+  }
+  return map;
+}
+
+let memCovers: Map<string, string> | null = null;
+let coversInflight: Promise<Map<string, string>> | null = null;
+
+// Instant cover map from memory/localStorage (empty if none cached yet).
+export function getCachedCovers(): Map<string, string> {
+  if (memCovers) return memCovers;
+  try {
+    const raw = localStorage.getItem(COVERS_CACHE_KEY);
+    if (raw) {
+      memCovers = coversFromCsv((JSON.parse(raw) as CacheShape).csv);
+      return memCovers;
+    }
+  } catch {
+    /* ignore */
+  }
+  return new Map();
+}
+
+// Fetches the covers sheet (if configured) and updates caches. Resolves to an
+// empty map when covers are disabled or the fetch fails.
+export function fetchFreshCovers(): Promise<Map<string, string>> {
+  if (!config.coversCsvUrl) return Promise.resolve(new Map());
+  if (coversInflight) return coversInflight;
+  coversInflight = (async () => {
+    try {
+      const res = await fetch(config.coversCsvUrl, { redirect: "follow" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const csv = await res.text();
+      try {
+        const payload: CacheShape = { fetchedAt: Date.now(), csv };
+        localStorage.setItem(COVERS_CACHE_KEY, JSON.stringify(payload));
+      } catch {
+        /* best-effort */
+      }
+      memCovers = coversFromCsv(csv);
+      return memCovers;
+    } finally {
+      coversInflight = null;
+    }
+  })();
+  return coversInflight;
+}
+
+// Looks up a book's cover image URL from the covers map (or undefined).
+export function coverForBook(
+  covers: Map<string, string>,
+  book: string,
+): string | undefined {
+  return covers.get(normalizeTitle(book));
 }

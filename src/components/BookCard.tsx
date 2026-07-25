@@ -39,10 +39,18 @@ function coverGradient(seed: string): string {
 const CARD =
   "overflow-hidden rounded-xl border border-amber-200 bg-[#fffdf8] shadow-sm dark:border-stone-700 dark:bg-stone-800";
 
-export function BookCard({ group }: { group: BookGroup }) {
+export function BookCard({
+  group,
+  coverUrl,
+}: {
+  group: BookGroup;
+  coverUrl?: string;
+}) {
   const [open, setOpen] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
   const grad = coverGradient(group.book + group.author);
   const coverText = group.book.split(/\s+/).slice(0, 3).join(" ");
+  const showImage = Boolean(coverUrl) && !imgFailed;
 
   return (
     <div className={CARD}>
@@ -52,18 +60,29 @@ export function BookCard({ group }: { group: BookGroup }) {
         className="flex w-full items-stretch gap-4 p-4 text-right"
         aria-expanded={open}
       >
-        {/* book cover tile */}
-        <div
-          className={`relative flex w-16 flex-none items-center justify-center rounded-md bg-gradient-to-b ${grad} p-1.5 shadow-md sm:w-20`}
-        >
-          <span className="absolute inset-y-1.5 start-1 w-1 rounded-full bg-white/25" />
-          <span
-            className="line-clamp-4 text-center text-xs font-bold leading-tight text-white/95"
-            dir="auto"
+        {/* book cover: real image when available, otherwise a colored tile */}
+        {showImage ? (
+          <img
+            src={coverUrl}
+            alt={group.book}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setImgFailed(true)}
+            className="w-16 flex-none rounded-md object-cover shadow-md sm:w-20"
+          />
+        ) : (
+          <div
+            className={`relative flex w-16 flex-none items-center justify-center rounded-md bg-gradient-to-b ${grad} p-1.5 shadow-md sm:w-20`}
           >
-            {coverText}
-          </span>
-        </div>
+            <span className="absolute inset-y-1.5 start-1 w-1 rounded-full bg-white/25" />
+            <span
+              className="line-clamp-4 text-center text-xs font-bold leading-tight text-white/95"
+              dir="auto"
+            >
+              {coverText}
+            </span>
+          </div>
+        )}
 
         {/* details */}
         <div className="flex min-w-0 flex-1 flex-col justify-center">
