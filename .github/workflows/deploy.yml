@@ -10,9 +10,12 @@ permissions:
   pages: write
   id-token: write
 
+# Allow one Pages deployment at a time, but never cancel one mid-flight:
+# cancelling an in-progress deployment can leave it stuck server-side and block
+# future deployments (this matches GitHub's recommended Pages workflow).
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
