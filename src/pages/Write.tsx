@@ -2,9 +2,17 @@ import { Link } from "react-router-dom";
 import { config } from "../config";
 import { t } from "../strings";
 
-// Google Forms renders inside an iframe when the `embedded=true` param is set.
-function toEmbedUrl(url: string): string {
-  return url + (url.includes("?") ? "&" : "?") + "embedded=true";
+// Google Forms renders inside an iframe when `embedded=true` is set, and it
+// honors `hl` to force the interface language (and thus text direction). We pin
+// Hebrew (`iw` is Google's locale code) so the form stays right-to-left even
+// for visitors whose Google account UI language is set to something else
+// (e.g. English) — otherwise Google renders it in the signed-in account's
+// language and it looks left-to-right.
+function withFormParams(url: string, extra: Record<string, string> = {}): string {
+  const [base, hash = ""] = url.split("#");
+  const sep = base.includes("?") ? "&" : "?";
+  const query = new URLSearchParams({ hl: "iw", ...extra }).toString();
+  return base + sep + query + (hash ? `#${hash}` : "");
 }
 
 export function Write() {
@@ -18,7 +26,7 @@ export function Write() {
           {t.backHome}
         </Link>
         <a
-          href={config.formUrl}
+          href={withFormParams(config.formUrl)}
           target="_blank"
           rel="noreferrer"
           className="text-sm text-amber-700 hover:underline dark:text-amber-400"
@@ -32,7 +40,7 @@ export function Write() {
       </h1>
 
       <iframe
-        src={toEmbedUrl(config.formUrl)}
+        src={withFormParams(config.formUrl, { embedded: "true" })}
         title={t.writeReview}
         className="h-[calc(100vh-12rem)] min-h-[600px] w-full rounded-xl border border-amber-200 bg-white dark:border-stone-700"
       >

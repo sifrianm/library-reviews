@@ -81,14 +81,9 @@ export default function App() {
       <footer className="flex flex-col items-center gap-1 py-4 text-center text-xs text-stone-600 dark:text-stone-400">
         <span className="flex flex-wrap items-center justify-center gap-1.5">
           <span>{config.libraryName}</span>
-          <svg
-            className="h-3.5 w-3.5 flex-none text-rose-500"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M10 17.5l-1.09-.99C5.14 13.09 2.5 10.71 2.5 7.75 2.5 5.4 4.34 3.5 6.75 3.5c1.36 0 2.66.63 3.25 1.64.59-1.01 1.89-1.64 3.25-1.64 2.41 0 4.25 1.9 4.25 4.25 0 2.96-2.64 5.34-6.41 8.76L10 17.5z" />
-          </svg>
+          <span aria-hidden className="text-stone-400 dark:text-stone-500">
+            •
+          </span>
           <span>{t.madeWithLove}</span>
         </span>
         <Link
