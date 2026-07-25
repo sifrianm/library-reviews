@@ -42,3 +42,6 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          # Give GitHub's Pages backend more room on slow days (default 10m).
+          timeout: 1200000
