@@ -7,14 +7,28 @@ import { t } from "./strings";
 import { ModeSwitch } from "./theme";
 
 export default function App() {
-  // Load the optional UserWay accessibility toolbar when an account id is set.
+  // Load the self-hosted Legilo accessibility reading-aid toolbar
+  // (public/legilo.js). Config is passed via data-* attributes read by the
+  // widget from its own script tag.
   useEffect(() => {
-    const account = config.accessibilityWidgetAccountId;
-    if (!account || document.getElementById("userway-widget-script")) return;
+    if (
+      !config.accessibilityWidget ||
+      document.getElementById("legilo-widget-script")
+    )
+      return;
     const s = document.createElement("script");
-    s.id = "userway-widget-script";
-    s.src = "https://cdn.userway.org/widget.js";
-    s.setAttribute("data-account", account);
+    s.id = "legilo-widget-script";
+    s.src = `${import.meta.env.BASE_URL}legilo.js`;
+    s.defer = true;
+    s.setAttribute("data-lang", "he");
+    s.setAttribute("data-color", "b45309");
+    s.setAttribute("data-pos", "bl");
+    s.setAttribute("data-hotkey", "1");
+    // Link our Hebrew accessibility statement in the widget's panel footer.
+    s.setAttribute(
+      "data-statement",
+      `${window.location.origin}${window.location.pathname}#/accessibility`,
+    );
     document.body.appendChild(s);
   }, []);
 

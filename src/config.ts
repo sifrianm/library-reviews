@@ -26,13 +26,14 @@ export const config = {
 
   // Contact for accessibility issues, shown on the accessibility statement
   // page. Fill in a real address so visitors can report problems.
-  accessibilityContactEmail: "",
+  accessibilityContactEmail: "sifria2@gmail.com",
 
-  // Optional: UserWay accessibility widget account id (free sign-up at
-  // userway.org -> add your site -> copy the account id). When set, a floating
-  // accessibility toolbar (font size, contrast, link highlight, etc.) loads.
-  // Leave empty to disable it.
-  accessibilityWidgetAccountId: "",
+  // Show the Legilo accessibility reading-aid toolbar: a free, open-source,
+  // fully self-hosted floating menu (font size, contrast, spacing, dyslexia
+  // font, read-aloud, reading mask, and more). The widget and its font ship in
+  // public/legilo.js + public/legilo-opendyslexic-400.woff2, so nothing loads
+  // from a third party. Set to false to hide the floating button.
+  accessibilityWidget: true,
 
   // How many book cards to show per "page" before "load more".
   pageSize: 24,
