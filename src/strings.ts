@@ -9,7 +9,7 @@ export const t = {
   accessibilityStatement: "הצהרת נגישות",
 
   // Footer credit
-  madeWithLove: "נעשה באהבה ע״י משפחת נמיר",
+  madeWithLove: "נכתב באהבה ע״י משפחת נמיר",
 
   // Home
   writeReview: "כתיבת ביקורת",
