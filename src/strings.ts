@@ -4,6 +4,13 @@ export const t = {
   appTitle: "ביקורות ספרים",
   tagline: "מה הקוראים שלנו חושבים על הספרים בספרייה",
 
+  // Accessibility
+  skipToContent: "דילוג לתוכן הראשי",
+  accessibilityStatement: "הצהרת נגישות",
+
+  // Footer credit
+  madeWithLove: "תוכנת באהבה ע״י משפחת נמיר",
+
   // Home
   writeReview: "כתיבת ביקורת",
   writeReviewSub: "מילוי טופס ביקורת על ספר שקראתם",
@@ -18,6 +25,7 @@ export const t = {
   openFormFullPage: "פתיחת הטופס בחלון חדש",
   formLoading: "טוען את הטופס...",
   searchPlaceholder: "חיפוש...",
+  searchScopeLabel: "היקף החיפוש",
   searchScopeAll: "הכל",
   searchScopeBook: "שם הספר",
   searchScopeAuthor: "שם הסופר/ת",

@@ -157,12 +157,14 @@ export function Reviews() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
+              aria-label={t.searchPlaceholder}
               className={`w-full ${FIELD}`}
               dir="auto"
             />
             <select
               value={scope}
               onChange={(e) => setScope(e.target.value as Scope)}
+              aria-label={t.searchScopeLabel}
               className={FIELD}
             >
               <option value="all">{t.searchScopeAll}</option>
@@ -179,6 +181,7 @@ export function Reviews() {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
+              aria-label={t.sortLabel}
               className={FIELD}
             >
               <option value="newest">{t.sortNewest}</option>

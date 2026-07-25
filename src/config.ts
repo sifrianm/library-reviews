@@ -24,6 +24,16 @@ export const config = {
   coversCsvUrl:
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn2ecMWh1sS8oo80YGQxdw8HryCTHG7CMBXsuchN_48dNV2PltK_IgPvrl3sPSo9ODtwiRdp-6eh65/pub?gid=0&single=true&output=csv",
 
+  // Contact for accessibility issues, shown on the accessibility statement
+  // page. Fill in a real address so visitors can report problems.
+  accessibilityContactEmail: "",
+
+  // Optional: UserWay accessibility widget account id (free sign-up at
+  // userway.org -> add your site -> copy the account id). When set, a floating
+  // accessibility toolbar (font size, contrast, link highlight, etc.) loads.
+  // Leave empty to disable it.
+  accessibilityWidgetAccountId: "",
+
   // How many book cards to show per "page" before "load more".
   pageSize: 24,
 } as const;
