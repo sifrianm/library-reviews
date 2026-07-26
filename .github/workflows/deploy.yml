@@ -41,7 +41,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
+        # deploy-pages caps its timeout at 600000 ms (10 min), which is also the
+        # default, so we don't override it. If a deploy ever times out due to a
+        # slow Pages backend, just re-run the workflow.
         uses: actions/deploy-pages@v5
-        with:
-          # Give GitHub's Pages backend more room on slow days (default 10m).
-          timeout: 1200000
