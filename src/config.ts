@@ -4,7 +4,7 @@
 
 export const config = {
   // Shown in the site header / home screen.
-  libraryName: "ספריית נווה-מונוסון",
+  libraryName: "ספריית נוה-מונוסון",
 
   // Public "fill the form" URL (Google Form -> Send -> link).
   // Leave empty until you have it; the "write a review" button will be disabled.
