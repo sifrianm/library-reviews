@@ -26,7 +26,7 @@ export const t = {
   statsNoRank: "ללא דירוג",
   statsAnonymous: "ללא שם",
   statsEmpty: "אין עדיין נתונים להצגה.",
-  statsLoadTimes: "זמני טעינה ראשונית (קור)",
+  statsLoadTimes: "זמני טעינה ראשונית",
   statsLoadPending: "טוען…",
   statsMs: (ms: number) =>
     ms >= 1000 ? `${(ms / 1000).toFixed(2)} שנ׳` : `${Math.round(ms)} מ״ש`,
