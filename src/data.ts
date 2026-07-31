@@ -158,6 +158,16 @@ function writeCache(cacheKey: string, csv: string) {
 const memReviews = new Map<string, Review[]>();
 const inflight = new Map<string, Promise<Review[]>>();
 
+// Duration (ms) of the last successful network fetch per source, for the stats
+// page. Measured around the fetch + download (not the localStorage-cached read).
+const loadTimes = new Map<string, number>();
+
+// Last measured load time (ms) for a source, or null if it hasn't been fetched
+// from the network yet this session.
+export function getLoadTimeMs(source: ReviewsSource): number | null {
+  return loadTimes.get(source.cacheKey) ?? null;
+}
+
 // Returns the last-known reviews instantly (memory, then localStorage) without
 // any network call, or null if nothing is cached yet. Used for instant paint.
 export function getCachedReviews(source: ReviewsSource): Review[] | null {
@@ -177,10 +187,12 @@ export function fetchFreshReviews(source: ReviewsSource): Promise<Review[]> {
   const existing = inflight.get(source.cacheKey);
   if (existing) return existing;
   const p = (async () => {
+    const start = performance.now();
     try {
       const res = await fetch(source.csvUrl, { redirect: "follow" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csv = await res.text();
+      loadTimes.set(source.cacheKey, performance.now() - start);
       writeCache(source.cacheKey, csv);
       const rows = rowsFromCsv(csv);
       memReviews.set(source.cacheKey, rows);

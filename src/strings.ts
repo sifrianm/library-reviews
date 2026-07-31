@@ -26,6 +26,10 @@ export const t = {
   statsNoRank: "ללא דירוג",
   statsAnonymous: "ללא שם",
   statsEmpty: "אין עדיין נתונים להצגה.",
+  statsLoadTimes: "זמני טעינת הנתונים",
+  statsLoadPending: "טוען…",
+  statsMs: (ms: number) =>
+    ms >= 1000 ? `${(ms / 1000).toFixed(2)} שנ׳` : `${Math.round(ms)} מ״ש`,
 
   // Footer credit
   madeWithLove: "נוצר לספרייה ב ❤️ ע״י משפחת נמיר",

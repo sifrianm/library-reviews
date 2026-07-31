@@ -9,6 +9,7 @@ import {
   KIDS_SOURCE,
   fetchFreshReviews,
   getCachedReviews,
+  getLoadTimeMs,
   groupByBook,
 } from "../data";
 import { t } from "../strings";
@@ -29,6 +30,10 @@ export function Stats() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
+  const [loadMs, setLoadMs] = useState<{
+    adults: number | null;
+    kids: number | null;
+  }>({ adults: null, kids: null });
 
   useEffect(() => {
     const a = getCachedReviews(ADULTS_SOURCE);
@@ -38,8 +43,14 @@ export function Stats() {
     if (a || k) setStatus("ready");
 
     Promise.allSettled([
-      fetchFreshReviews(ADULTS_SOURCE).then(setAdults),
-      fetchFreshReviews(KIDS_SOURCE).then(setKids),
+      fetchFreshReviews(ADULTS_SOURCE).then((rows) => {
+        setAdults(rows);
+        setLoadMs((m) => ({ ...m, adults: getLoadTimeMs(ADULTS_SOURCE) }));
+      }),
+      fetchFreshReviews(KIDS_SOURCE).then((rows) => {
+        setKids(rows);
+        setLoadMs((m) => ({ ...m, kids: getLoadTimeMs(KIDS_SOURCE) }));
+      }),
     ]).then((res) => {
       if (res.some((r) => r.status === "fulfilled")) setStatus("ready");
       else if (!a && !k) setStatus("error");
@@ -206,8 +217,27 @@ export function Stats() {
               </div>
             </section>
           )}
+
+          <section className={CARD}>
+            <SectionTitle>{t.statsLoadTimes}</SectionTitle>
+            <div className="space-y-2">
+              <LoadTimeRow label={t.adultsSection} ms={loadMs.adults} />
+              <LoadTimeRow label={t.childrenSection} ms={loadMs.kids} />
+            </div>
+          </section>
         </div>
       )}
+    </div>
+  );
+}
+
+function LoadTimeRow({ label, ms }: { label: string; ms: number | null }) {
+  return (
+    <div className="flex items-center justify-between gap-2 border-b border-amber-100 pb-2 last:border-0 last:pb-0 dark:border-stone-700">
+      <span className="text-sm text-stone-700 dark:text-stone-300">{label}</span>
+      <span className="flex-none font-mono text-sm font-medium text-stone-500 dark:text-stone-400">
+        {ms == null ? t.statsLoadPending : t.statsMs(ms)}
+      </span>
     </div>
   );
 }
