@@ -66,6 +66,7 @@ export const t = {
   sortRankDesc: "דירוג גבוה לנמוך",
   sortRankAsc: "דירוג נמוך לגבוה",
   sortMostReviewed: "הכי הרבה ביקורות",
+  sortGenreAsc: "לפי סוגה (א-ת)",
 
   clearFilters: "ניקוי חיפוש",
   loadMore: "עוד ביקורות",

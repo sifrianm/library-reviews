@@ -22,7 +22,8 @@ type Sort =
   | "authorAsc"
   | "rankDesc"
   | "rankAsc"
-  | "mostReviewed";
+  | "mostReviewed"
+  | "genreAsc";
 
 const collator = new Intl.Collator("he");
 
@@ -137,6 +138,17 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
           return a.avgScore - b.avgScore;
         case "mostReviewed":
           return b.count - a.count;
+        case "genreAsc": {
+          // Books can carry several genres; compare by their first genre
+          // alphabetically, and push books without a genre to the end.
+          const ga = a.genres.length ? [...a.genres].sort(collator.compare)[0] : "";
+          const gb = b.genres.length ? [...b.genres].sort(collator.compare)[0] : "";
+          if (!ga && !gb) return b.latest - a.latest;
+          if (!ga) return 1;
+          if (!gb) return -1;
+          const byGenre = collator.compare(ga, gb);
+          return byGenre !== 0 ? byGenre : b.latest - a.latest;
+        }
         case "newest":
         default:
           return b.latest - a.latest;
@@ -148,6 +160,11 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
   useEffect(() => {
     setVisible(config.pageSize);
   }, [query, scope, genre, sort]);
+
+  // Fall back to the default sort if the current data has no genres (e.g. kids).
+  useEffect(() => {
+    if (sort === "genreAsc" && allGenres.length === 0) setSort("rankDesc");
+  }, [sort, allGenres]);
 
   const totalReviews = useMemo(
     () => filtered.reduce((sum, g) => sum + g.count, 0),
@@ -233,6 +250,9 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
                 <option value="rankDesc">{t.sortRankDesc}</option>
                 <option value="rankAsc">{t.sortRankAsc}</option>
                 <option value="mostReviewed">{t.sortMostReviewed}</option>
+                {allGenres.length > 0 && (
+                  <option value="genreAsc">{t.sortGenreAsc}</option>
+                )}
               </select>
             </span>
           </div>
