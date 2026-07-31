@@ -9,9 +9,10 @@ import {
   KIDS_SOURCE,
   fetchFreshReviews,
   getCachedReviews,
-  getLoadTimeMs,
+  getColdLoadTimeMs,
   groupByBook,
 } from "../data";
+import type { ReviewsSource } from "../data";
 import { t } from "../strings";
 import type { BookGroup, Review } from "../types";
 
@@ -30,10 +31,15 @@ export function Stats() {
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
-  const [loadMs, setLoadMs] = useState<{
+  // Persisted first ("cold") network-load time per source. Seeded from
+  // localStorage so a known value shows instantly without any fetch.
+  const [coldMs, setColdMs] = useState<{
     adults: number | null;
     kids: number | null;
-  }>({ adults: null, kids: null });
+  }>(() => ({
+    adults: getColdLoadTimeMs(ADULTS_SOURCE),
+    kids: getColdLoadTimeMs(KIDS_SOURCE),
+  }));
 
   useEffect(() => {
     const a = getCachedReviews(ADULTS_SOURCE);
@@ -42,18 +48,30 @@ export function Stats() {
     if (k) setKids(k);
     if (a || k) setStatus("ready");
 
-    Promise.allSettled([
-      fetchFreshReviews(ADULTS_SOURCE).then((rows) => {
-        setAdults(rows);
-        setLoadMs((m) => ({ ...m, adults: getLoadTimeMs(ADULTS_SOURCE) }));
-      }),
-      fetchFreshReviews(KIDS_SOURCE).then((rows) => {
-        setKids(rows);
-        setLoadMs((m) => ({ ...m, kids: getLoadTimeMs(KIDS_SOURCE) }));
-      }),
+    // For each source: if the cold-load time is already recorded, just show it
+    // (no network fetch). Otherwise fetch once — that fills the cache and
+    // records the genuine first-load duration, which we then display.
+    const measure = (
+      source: ReviewsSource,
+      setRows: (rows: Review[]) => void,
+      field: "adults" | "kids",
+    ): Promise<boolean> => {
+      if (getColdLoadTimeMs(source) != null) return Promise.resolve(true);
+      return fetchFreshReviews(source)
+        .then((rows) => {
+          setRows(rows);
+          setColdMs((m) => ({ ...m, [field]: getColdLoadTimeMs(source) }));
+          return true;
+        })
+        .catch(() => false);
+    };
+
+    Promise.all([
+      measure(ADULTS_SOURCE, setAdults, "adults"),
+      measure(KIDS_SOURCE, setKids, "kids"),
     ]).then((res) => {
-      if (res.some((r) => r.status === "fulfilled")) setStatus("ready");
-      else if (!a && !k) setStatus("error");
+      if (res.some(Boolean) || a || k) setStatus("ready");
+      else setStatus("error");
     });
   }, []);
 
@@ -221,8 +239,8 @@ export function Stats() {
           <section className={CARD}>
             <SectionTitle>{t.statsLoadTimes}</SectionTitle>
             <div className="space-y-2">
-              <LoadTimeRow label={t.adultsSection} ms={loadMs.adults} />
-              <LoadTimeRow label={t.childrenSection} ms={loadMs.kids} />
+              <LoadTimeRow label={t.adultsSection} ms={coldMs.adults} />
+              <LoadTimeRow label={t.childrenSection} ms={coldMs.kids} />
             </div>
           </section>
         </div>

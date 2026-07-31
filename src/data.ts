@@ -168,6 +168,37 @@ export function getLoadTimeMs(source: ReviewsSource): number | null {
   return loadTimes.get(source.cacheKey) ?? null;
 }
 
+// localStorage key holding the duration (ms) of the very first ("cold") network
+// fetch ever recorded for a source. Persisted once and never overwritten.
+function coldLoadKey(cacheKey: string): string {
+  return `${cacheKey}-coldloadms`;
+}
+
+// Reads the persisted cold-start load time (ms) for a source, or null if the
+// first fetch has never been recorded.
+export function getColdLoadTimeMs(source: ReviewsSource): number | null {
+  try {
+    const raw = localStorage.getItem(coldLoadKey(source.cacheKey));
+    if (raw == null) return null;
+    const ms = Number(raw);
+    return Number.isFinite(ms) ? ms : null;
+  } catch {
+    return null;
+  }
+}
+
+// Persists the first measured fetch duration for a source. Best-effort and
+// write-once: subsequent calls never overwrite the original cold value.
+function recordColdLoadTime(cacheKey: string, ms: number) {
+  try {
+    if (localStorage.getItem(coldLoadKey(cacheKey)) == null) {
+      localStorage.setItem(coldLoadKey(cacheKey), String(ms));
+    }
+  } catch {
+    // Storage may be full or unavailable; recording is best-effort.
+  }
+}
+
 // Returns the last-known reviews instantly (memory, then localStorage) without
 // any network call, or null if nothing is cached yet. Used for instant paint.
 export function getCachedReviews(source: ReviewsSource): Review[] | null {
@@ -192,7 +223,9 @@ export function fetchFreshReviews(source: ReviewsSource): Promise<Review[]> {
       const res = await fetch(source.csvUrl, { redirect: "follow" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csv = await res.text();
-      loadTimes.set(source.cacheKey, performance.now() - start);
+      const elapsed = performance.now() - start;
+      loadTimes.set(source.cacheKey, elapsed);
+      recordColdLoadTime(source.cacheKey, elapsed);
       writeCache(source.cacheKey, csv);
       const rows = rowsFromCsv(csv);
       memReviews.set(source.cacheKey, rows);
