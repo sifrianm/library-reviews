@@ -103,6 +103,9 @@ export function BookCard({
           )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <AverageRankBadge score={group.avgScore} />
+            {group.genres.map((g) => (
+              <GenreBadge key={g} value={g} />
+            ))}
             <span className="text-xs text-stone-500 dark:text-stone-400">
               {t.reviewsCount(group.count)}
             </span>
