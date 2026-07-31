@@ -40,6 +40,13 @@ function rowsFromCsv(csv: string): Review[] {
     skipEmptyLines: true,
   });
 
+  // The genre column header carries its option list in parentheses, so match it
+  // exactly first and otherwise fall back to any header starting with "סוגה".
+  const fields = parsed.meta.fields ?? [];
+  const genreCol =
+    fields.find((h) => h === HEADER_MAP.genre) ??
+    fields.find((h) => h.trim().startsWith("סוגה"));
+
   const reviews: Review[] = [];
   parsed.data.forEach((row, i) => {
     const book = (row[HEADER_MAP.book] ?? "").trim();
@@ -47,6 +54,7 @@ function rowsFromCsv(csv: string): Review[] {
     const rank = (row[HEADER_MAP.rank] ?? "").trim();
     const review = (row[HEADER_MAP.review] ?? "").trim();
     const reader = (row[HEADER_MAP.reader] ?? "").trim();
+    const genre = (genreCol ? row[genreCol] : "")?.trim() ?? "";
     const rawDate = (row[HEADER_MAP.date] ?? "").trim();
 
     // Skip rows with no book title (blank/malformed lines).
@@ -59,6 +67,7 @@ function rowsFromCsv(csv: string): Review[] {
       rank,
       review,
       reader,
+      genre,
       rawDate,
       date: parseSheetDate(rawDate),
     });
@@ -82,6 +91,7 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
         count: 0,
         avgScore: 0,
         latest: 0,
+        genres: [],
       };
       groups.set(key, g);
     }
@@ -97,6 +107,9 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
       .filter((s): s is number => typeof s === "number");
     g.avgScore =
       scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+    g.genres = [
+      ...new Set(g.reviews.map((r) => r.genre).filter((s) => s.length > 0)),
+    ];
   }
 
   return [...groups.values()];

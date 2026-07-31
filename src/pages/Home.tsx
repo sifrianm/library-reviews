@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.jpg";
 import { config } from "../config";
@@ -29,18 +30,97 @@ export function Home() {
         <p className="mt-3 text-stone-600 dark:text-stone-300">{t.tagline}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormCard />
+      <div className="space-y-6">
+        <Section title={t.adultsSection}>
+          <FormCard />
+          <Tile
+            to="/reviews"
+            emoji="🔎"
+            title={t.browseReviews}
+            sub={t.browseReviewsSub}
+          />
+        </Section>
 
-        <Link to="/reviews" className={CARD}>
-          <span className="text-3xl">🔎</span>
-          <span className="mt-3 text-xl font-bold">{t.browseReviews}</span>
-          <span className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            {t.browseReviewsSub}
-          </span>
-        </Link>
+        <Section title={t.childrenSection} badge={t.comingSoon}>
+          <Tile
+            emoji="🖍️"
+            title={t.writeReview}
+            sub={t.writeReviewSub}
+            disabled
+          />
+          <Tile
+            emoji="🧸"
+            title={t.browseReviews}
+            sub={t.browseReviewsSub}
+            disabled
+          />
+        </Section>
       </div>
     </div>
+  );
+}
+
+function Section({
+  title,
+  badge,
+  children,
+}: {
+  title: string;
+  badge?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-amber-200/80 bg-[#f6f1e7]/60 p-4 dark:border-stone-700 dark:bg-stone-900/40 sm:p-5">
+      <div className="mb-3 flex items-center gap-2 px-1">
+        <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">
+          {title}
+        </h2>
+        {badge && (
+          <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
+            {badge}
+          </span>
+        )}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">{children}</div>
+    </section>
+  );
+}
+
+function Tile({
+  to,
+  emoji,
+  title,
+  sub,
+  disabled,
+}: {
+  to?: string;
+  emoji: string;
+  title: string;
+  sub: string;
+  disabled?: boolean;
+}) {
+  const body = (
+    <>
+      <span className="text-3xl">{emoji}</span>
+      <span className="mt-3 text-xl font-bold">{title}</span>
+      <span className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+        {sub}
+      </span>
+    </>
+  );
+
+  if (disabled || !to) {
+    return (
+      <div className={`${CARD} cursor-not-allowed opacity-60`} aria-disabled>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Link to={to} className={CARD}>
+      {body}
+    </Link>
   );
 }
 
@@ -58,12 +138,11 @@ function FormCard() {
   }
 
   return (
-    <Link to="/write" className={CARD}>
-      <span className="text-3xl">✍️</span>
-      <span className="mt-3 text-xl font-bold">{t.writeReview}</span>
-      <span className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-        {t.writeReviewSub}
-      </span>
-    </Link>
+    <Tile
+      to="/write"
+      emoji="✍️"
+      title={t.writeReview}
+      sub={t.writeReviewSub}
+    />
   );
 }

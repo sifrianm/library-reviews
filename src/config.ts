@@ -56,6 +56,10 @@ export const HEADER_MAP = {
   rank: "מה דעתי על הספר",
   review: "כמה מילים על הספר:",
   reader: "שם הקורא/ת",
+  // The genre column header includes the option list in parentheses. Parsing
+  // also falls back to any header starting with "סוגה", so small edits to the
+  // parenthetical won't break it.
+  genre: "סוגה (סיפורת / מתח / מדע בדיוני / עיון/ ילדים)",
 } as const;
 
 export type RankLevel = {

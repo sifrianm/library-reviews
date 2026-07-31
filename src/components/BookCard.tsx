@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { BookGroup, Review } from "../types";
 import { t } from "../strings";
+import { GenreBadge } from "./GenreBadge";
 import { AverageRankBadge, RankBadge } from "./RankBadge";
 
 const dateFmt = new Intl.DateTimeFormat("he-IL", {
@@ -153,6 +154,7 @@ function ReviewItem({ review }: { review: Review }) {
           {review.reader || "—"}
         </span>
         <div className="flex items-center gap-2">
+          <GenreBadge value={review.genre} />
           <RankBadge value={review.rank} />
           <span className="text-xs text-stone-500 dark:text-stone-400">
             {formatDate(review.date)}

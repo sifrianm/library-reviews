@@ -18,6 +18,11 @@ export const t = {
   browseReviewsSub: "חיפוש ועיון בביקורות של הקוראים",
   formUnavailable: "קישור הטופס יתווסף בקרוב",
 
+  // Home sections
+  adultsSection: "ספרי מבוגרים",
+  childrenSection: "ספרי ילדים",
+  comingSoon: "בקרוב",
+
   // Reviews page
   backHome: "חזרה לדף הבית",
 
@@ -30,6 +35,9 @@ export const t = {
   searchScopeBook: "שם הספר",
   searchScopeAuthor: "שם הסופר/ת",
   searchScopeReader: "שם הקורא/ת",
+
+  genreLabel: "סוגה",
+  genreAll: "כל הסוגות",
 
   sortLabel: "מיון",
   sortNewest: "החדשות ביותר",

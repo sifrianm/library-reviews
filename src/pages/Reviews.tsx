@@ -42,7 +42,8 @@ export function Reviews() {
   );
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<Scope>("all");
-  const [sort, setSort] = useState<Sort>("newest");
+  const [genre, setGenre] = useState<string>("all");
+  const [sort, setSort] = useState<Sort>("rankDesc");
   const [visible, setVisible] = useState<number>(config.pageSize);
 
   function load() {
@@ -79,12 +80,18 @@ export function Reviews() {
 
   const allGroups = useMemo(() => groupByBook(reviews), [reviews]);
 
+  const allGenres = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of reviews) if (r.genre) set.add(r.genre);
+    return [...set].sort((a, b) => collator.compare(a, b));
+  }, [reviews]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let result: BookGroup[] = allGroups;
 
     if (q) {
-      result = allGroups.filter((g) => {
+      result = result.filter((g) => {
         const inBook = g.book.toLowerCase().includes(q);
         const inAuthor = g.author.toLowerCase().includes(q);
         const inReader = g.reviews.some((r) =>
@@ -103,6 +110,10 @@ export function Reviews() {
       });
     }
 
+    if (genre !== "all") {
+      result = result.filter((g) => g.genres.includes(genre));
+    }
+
     const sorted = [...result];
     sorted.sort((a, b) => {
       switch (sort) {
@@ -110,8 +121,10 @@ export function Reviews() {
           return collator.compare(a.book, b.book);
         case "authorAsc":
           return collator.compare(a.author, b.author);
-        case "rankDesc":
-          return b.avgScore - a.avgScore;
+        case "rankDesc": {
+          const byRank = b.avgScore - a.avgScore;
+          return byRank !== 0 ? byRank : b.latest - a.latest;
+        }
         case "rankAsc":
           return a.avgScore - b.avgScore;
         case "mostReviewed":
@@ -122,11 +135,11 @@ export function Reviews() {
       }
     });
     return sorted;
-  }, [allGroups, query, scope, sort]);
+  }, [allGroups, query, scope, genre, sort]);
 
   useEffect(() => {
     setVisible(config.pageSize);
-  }, [query, scope, sort]);
+  }, [query, scope, genre, sort]);
 
   const totalReviews = useMemo(
     () => filtered.reduce((sum, g) => sum + g.count, 0),
@@ -174,35 +187,59 @@ export function Reviews() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-stone-500 dark:text-stone-400">
-              {t.sortLabel}
-            </label>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as Sort)}
-              aria-label={t.sortLabel}
-              className={FIELD}
-            >
-              <option value="newest">{t.sortNewest}</option>
-              <option value="bookAsc">{t.sortBookAsc}</option>
-              <option value="authorAsc">{t.sortAuthorAsc}</option>
-              <option value="rankDesc">{t.sortRankDesc}</option>
-              <option value="rankAsc">{t.sortRankAsc}</option>
-              <option value="mostReviewed">{t.sortMostReviewed}</option>
-            </select>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            {allGenres.length > 0 && (
+              <span className="flex items-center gap-2">
+                <label className="text-sm text-stone-500 dark:text-stone-400">
+                  {t.genreLabel}
+                </label>
+                <select
+                  value={genre}
+                  onChange={(e) => setGenre(e.target.value)}
+                  aria-label={t.genreLabel}
+                  className={FIELD}
+                >
+                  <option value="all">{t.genreAll}</option>
+                  {allGenres.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </span>
+            )}
+
+            <span className="flex items-center gap-2">
+              <label className="text-sm text-stone-500 dark:text-stone-400">
+                {t.sortLabel}
+              </label>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as Sort)}
+                aria-label={t.sortLabel}
+                className={FIELD}
+              >
+                <option value="newest">{t.sortNewest}</option>
+                <option value="bookAsc">{t.sortBookAsc}</option>
+                <option value="authorAsc">{t.sortAuthorAsc}</option>
+                <option value="rankDesc">{t.sortRankDesc}</option>
+                <option value="rankAsc">{t.sortRankAsc}</option>
+                <option value="mostReviewed">{t.sortMostReviewed}</option>
+              </select>
+            </span>
           </div>
         </div>
 
         {status === "ready" && (
           <div className="mt-2 flex items-center justify-between text-xs text-stone-500 dark:text-stone-400">
             <span>{t.resultsCount(filtered.length, totalReviews)}</span>
-            {query && (
+            {(query || genre !== "all") && (
               <button
                 type="button"
                 onClick={() => {
                   setQuery("");
                   setScope("all");
+                  setGenre("all");
                 }}
                 className="text-amber-700 hover:underline dark:text-amber-400"
               >

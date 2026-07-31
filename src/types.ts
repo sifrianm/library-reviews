@@ -5,6 +5,7 @@ export type Review = {
   rank: string;
   review: string;
   reader: string;
+  genre: string;
   date: Date | null;
   rawDate: string;
 };
@@ -17,4 +18,5 @@ export type BookGroup = {
   count: number;
   avgScore: number;
   latest: number; // ms timestamp of the most recent review (0 if unknown)
+  genres: string[]; // distinct genres across this book's reviews
 };
