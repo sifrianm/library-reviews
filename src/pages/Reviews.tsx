@@ -49,7 +49,7 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<Scope>("all");
   const [genre, setGenre] = useState<string>("all");
-  const [sort, setSort] = useState<Sort>("rankDesc");
+  const [sort, setSort] = useState<Sort>("newest");
   const [visible, setVisible] = useState<number>(config.pageSize);
 
   function load() {
@@ -163,7 +163,7 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
 
   // Fall back to the default sort if the current data has no genres (e.g. kids).
   useEffect(() => {
-    if (sort === "genreAsc" && allGenres.length === 0) setSort("rankDesc");
+    if (sort === "genreAsc" && allGenres.length === 0) setSort("newest");
   }, [sort, allGenres]);
 
   const totalReviews = useMemo(
