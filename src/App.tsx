@@ -1,12 +1,22 @@
 import { useEffect } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import bookshelfBg from "./assets/bookshelf-bg.jpg";
+import kidsBg from "./assets/kids-bg.jpg";
 import logo from "./assets/logo.jpg";
 import { config } from "./config";
 import { t } from "./strings";
 import { ModeSwitch } from "./theme";
 
 export default function App() {
+  // Kids sections (/kids-reviews, /kids-write) get a playful, dreamy backdrop;
+  // everything else keeps the bookshelf.
+  const location = useLocation();
+  const isKids = location.pathname.startsWith("/kids");
+  const backgroundImage = isKids ? kidsBg : bookshelfBg;
+  const overlayClass = isKids
+    ? "bg-[#fbf7ff]/[0.72] dark:bg-[#181425]/[0.88]"
+    : "bg-[#f6f1e7]/[0.78] dark:bg-[#1a1613]/[0.90]";
+
   // Load the self-hosted Legilo accessibility reading-aid toolbar
   // (public/legilo.js). Config is passed via data-* attributes read by the
   // widget from its own script tag.
@@ -41,13 +51,13 @@ export default function App() {
         {t.skipToContent}
       </a>
 
-      {/* subtle colorful bookshelf backdrop, muted behind a paper/dark overlay */}
+      {/* colorful backdrop (bookshelf, or a kids theme), muted behind an overlay */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${bookshelfBg})` }}
+          style={{ backgroundImage: `url(${backgroundImage})` }}
         />
-        <div className="absolute inset-0 bg-[#f6f1e7]/[0.78] dark:bg-[#1a1613]/[0.90]" />
+        <div className={`absolute inset-0 ${overlayClass}`} />
       </div>
 
       <header className="border-b border-amber-200/70 bg-[#f6f1e7] dark:border-stone-700 dark:bg-stone-900">

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { BookCard } from "../components/BookCard";
 import { config } from "../config";
 import {
+  ADULTS_SOURCE,
+  KIDS_SOURCE,
   coverForBook,
   fetchFreshCovers,
   fetchFreshReviews,
@@ -32,7 +34,10 @@ const FIELD =
 const PRIMARY_BTN =
   "rounded-lg px-5 py-2 text-sm font-medium bg-amber-700 text-white hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500";
 
-export function Reviews() {
+export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" }) {
+  const source = variant === "kids" ? KIDS_SOURCE : ADULTS_SOURCE;
+  const heading = variant === "kids" ? t.browseReviewsKids : t.browseReviews;
+
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -48,15 +53,16 @@ export function Reviews() {
 
   function load() {
     // Paint instantly from any cached copy, then refresh in the background.
-    const cached = getCachedReviews();
+    const cached = getCachedReviews(source);
     if (cached) {
       setReviews(cached);
       setStatus("ready");
     } else {
+      setReviews([]);
       setStatus("loading");
     }
 
-    fetchFreshReviews()
+    fetchFreshReviews(source)
       .then((fresh) => {
         setReviews(fresh);
         setStatus("ready");
@@ -74,9 +80,11 @@ export function Reviews() {
       });
   }
 
+  // Reload whenever the source changes (e.g. navigating adults <-> kids).
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [source]);
 
   const allGroups = useMemo(() => groupByBook(reviews), [reviews]);
 
@@ -152,7 +160,7 @@ export function Reviews() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">
-          {t.browseReviews}
+          {heading}
         </h1>
         <Link
           to="/"

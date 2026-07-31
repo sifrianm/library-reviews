@@ -2,12 +2,27 @@ import Papa from "papaparse";
 import { config, COVERS_HEADER_MAP, HEADER_MAP, rankByValue } from "./config";
 import type { BookGroup, Review } from "./types";
 
-const CACHE_KEY = "library-reviews-cache-v2";
 const COVERS_CACHE_KEY = "library-reviews-covers-v1";
 
 type CacheShape = {
   fetchedAt: number;
   csv: string;
+};
+
+// A reviews collection: which published CSV to read and where to cache it.
+export type ReviewsSource = {
+  csvUrl: string;
+  cacheKey: string;
+};
+
+export const ADULTS_SOURCE: ReviewsSource = {
+  csvUrl: config.csvUrl,
+  cacheKey: "library-reviews-cache-v2",
+};
+
+export const KIDS_SOURCE: ReviewsSource = {
+  csvUrl: config.kidsCsvUrl,
+  cacheKey: "library-reviews-kids-cache-v1",
 };
 
 // Parses "DD/MM/YYYY H:MM:SS" (Google Sheets he-IL export) into a Date.
@@ -115,62 +130,69 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
   return [...groups.values()];
 }
 
-function readCache(): CacheShape | null {
+function readCache(cacheKey: string): CacheShape | null {
   try {
-    const raw = localStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(cacheKey);
     return raw ? (JSON.parse(raw) as CacheShape) : null;
   } catch {
     return null;
   }
 }
 
-function writeCache(csv: string) {
+function writeCache(cacheKey: string, csv: string) {
   try {
     const payload: CacheShape = { fetchedAt: Date.now(), csv };
-    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+    localStorage.setItem(cacheKey, JSON.stringify(payload));
   } catch {
     // Storage may be full or unavailable; caching is best-effort.
   }
 }
 
-// In-memory copies so navigating between pages never re-parses or re-fetches.
-let memReviews: Review[] | null = null;
-let inflight: Promise<Review[]> | null = null;
+// In-memory copies (keyed by source) so navigating between pages never
+// re-parses or re-fetches.
+const memReviews = new Map<string, Review[]>();
+const inflight = new Map<string, Promise<Review[]>>();
 
 // Returns the last-known reviews instantly (memory, then localStorage) without
 // any network call, or null if nothing is cached yet. Used for instant paint.
-export function getCachedReviews(): Review[] | null {
-  if (memReviews) return memReviews;
-  const cache = readCache();
+export function getCachedReviews(source: ReviewsSource): Review[] | null {
+  const mem = memReviews.get(source.cacheKey);
+  if (mem) return mem;
+  const cache = readCache(source.cacheKey);
   if (!cache) return null;
-  memReviews = rowsFromCsv(cache.csv);
-  return memReviews;
+  const rows = rowsFromCsv(cache.csv);
+  memReviews.set(source.cacheKey, rows);
+  return rows;
 }
 
-// Fetches fresh data from the sheet, updates caches, and returns it. Concurrent
-// callers share one in-flight request.
-export function fetchFreshReviews(): Promise<Review[]> {
-  if (inflight) return inflight;
-  inflight = (async () => {
+// Fetches fresh data from the source's sheet, updates caches, and returns it.
+// Concurrent callers for the same source share one in-flight request.
+export function fetchFreshReviews(source: ReviewsSource): Promise<Review[]> {
+  if (!source.csvUrl) return Promise.resolve([]);
+  const existing = inflight.get(source.cacheKey);
+  if (existing) return existing;
+  const p = (async () => {
     try {
-      const res = await fetch(config.csvUrl, { redirect: "follow" });
+      const res = await fetch(source.csvUrl, { redirect: "follow" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const csv = await res.text();
-      writeCache(csv);
-      memReviews = rowsFromCsv(csv);
-      return memReviews;
+      writeCache(source.cacheKey, csv);
+      const rows = rowsFromCsv(csv);
+      memReviews.set(source.cacheKey, rows);
+      return rows;
     } finally {
-      inflight = null;
+      inflight.delete(source.cacheKey);
     }
   })();
-  return inflight;
+  inflight.set(source.cacheKey, p);
+  return p;
 }
 
 // Warms the cache in the background (e.g. from the home screen) so the reviews
 // page is ready by the time the user navigates to it. Errors are ignored.
 export function prefetchReviews(): void {
-  if (!memReviews) {
-    fetchFreshReviews().catch(() => {
+  if (!memReviews.get(ADULTS_SOURCE.cacheKey)) {
+    fetchFreshReviews(ADULTS_SOURCE).catch(() => {
       /* will retry when the reviews page loads */
     });
   }

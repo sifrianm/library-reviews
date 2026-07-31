@@ -15,7 +15,9 @@ function withFormParams(url: string, extra: Record<string, string> = {}): string
   return base + sep + query + (hash ? `#${hash}` : "");
 }
 
-export function Write() {
+export function Write({ variant = "adults" }: { variant?: "adults" | "kids" }) {
+  const formUrl = variant === "kids" ? config.kidsFormUrl : config.formUrl;
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
@@ -26,7 +28,7 @@ export function Write() {
           {t.backHome}
         </Link>
         <a
-          href={withFormParams(config.formUrl)}
+          href={withFormParams(formUrl)}
           target="_blank"
           rel="noreferrer"
           className="text-sm text-amber-700 hover:underline dark:text-amber-400"
@@ -40,7 +42,7 @@ export function Write() {
       </h1>
 
       <iframe
-        src={withFormParams(config.formUrl, { embedded: "true" })}
+        src={withFormParams(formUrl, { embedded: "true" })}
         title={t.writeReview}
         className="h-[calc(100vh-12rem)] min-h-[600px] w-full rounded-xl border border-amber-200 bg-white dark:border-stone-700"
       >

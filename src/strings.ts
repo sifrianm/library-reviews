@@ -15,6 +15,7 @@ export const t = {
   writeReview: "כתיבת ביקורת",
   writeReviewSub: "מילוי טופס ביקורת על ספר שקראתם",
   browseReviews: "עיון בביקורות",
+  browseReviewsKids: "עיון בביקורות — ספרי ילדים",
   browseReviewsSub: "חיפוש ועיון בביקורות של הקוראים",
   formUnavailable: "קישור הטופס יתווסף בקרוב",
 

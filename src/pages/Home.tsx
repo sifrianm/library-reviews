@@ -32,7 +32,7 @@ export function Home() {
 
       <div className="space-y-6">
         <Section title={t.adultsSection}>
-          <FormCard />
+          <FormCard formUrl={config.formUrl} to="/write" emoji="✍️" />
           <Tile
             to="/reviews"
             emoji="🔎"
@@ -41,18 +41,13 @@ export function Home() {
           />
         </Section>
 
-        <Section title={t.childrenSection} badge={t.comingSoon}>
+        <Section title={t.childrenSection}>
+          <FormCard formUrl={config.kidsFormUrl} to="/kids-write" emoji="🖍️" />
           <Tile
-            emoji="🖍️"
-            title={t.writeReview}
-            sub={t.writeReviewSub}
-            disabled
-          />
-          <Tile
+            to="/kids-reviews"
             emoji="🧸"
             title={t.browseReviews}
             sub={t.browseReviewsSub}
-            disabled
           />
         </Section>
       </div>
@@ -124,25 +119,27 @@ function Tile({
   );
 }
 
-function FormCard() {
-  if (!config.formUrl) {
+function FormCard({
+  formUrl,
+  to,
+  emoji,
+}: {
+  formUrl: string;
+  to: string;
+  emoji: string;
+}) {
+  if (!formUrl) {
     return (
-      <div className={`${CARD} cursor-not-allowed opacity-60`} aria-disabled>
-        <span className="text-3xl">✍️</span>
-        <span className="mt-3 text-xl font-bold">{t.writeReview}</span>
-        <span className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-          {t.formUnavailable}
-        </span>
-      </div>
+      <Tile
+        emoji={emoji}
+        title={t.writeReview}
+        sub={t.formUnavailable}
+        disabled
+      />
     );
   }
 
   return (
-    <Tile
-      to="/write"
-      emoji="✍️"
-      title={t.writeReview}
-      sub={t.writeReviewSub}
-    />
+    <Tile to={to} emoji={emoji} title={t.writeReview} sub={t.writeReviewSub} />
   );
 }

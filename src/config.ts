@@ -11,12 +11,22 @@ export const config = {
   formUrl:
     "https://docs.google.com/forms/d/e/1FAIpQLSc1wm6gADnW0s2TsX0TS8-g3fnK9BKZ0RfGbMmBjOTlqZi1QQ/viewform",
 
+  // Public "fill the form" URL for the kids review form. Leave empty to keep the
+  // kids "write a review" button disabled.
+  kidsFormUrl:
+    "https://docs.google.com/forms/d/e/1FAIpQLScRrKC6CIRCqH3afstTwangxpf7Vzn_mIB3IIaa-SGBZVu0Cw/viewform",
+
   // Public CSV of the responses sheet via "File -> Share -> Publish to web -> CSV".
   // This endpoint sends `cache-control: max-age=300`, so the browser caches it for
   // ~5 min and repeat loads are instant. New form responses appear within a few
   // minutes (Google's publish refresh interval).
   csvUrl:
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTl4L0RFkLX5xrr3X3CXcs5pQUBk4Q2BG-ORm90yt8-czXZlTz3E7flpSUb-Q2vmLzC4uURw2OLRZQ5/pub?gid=437656259&single=true&output=csv",
+
+  // Public CSV of the kids reviews sheet (same "Publish to web -> CSV" flow).
+  // Same columns as the adults sheet. Leave empty to disable the kids reviews.
+  kidsCsvUrl:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoh_rqxOaJQaxGx3E_RPS61BkyjP3OAh_s2EoJZkmQI-b9P48uP8T2lorPGxdD-33XfByxlrYFT5lB/pub?gid=564123315&single=true&output=csv",
 
   // Optional: published CSV (File -> Share -> Publish to web -> CSV) of a
   // separate "covers" sheet that maps a book name to a cover image link.
