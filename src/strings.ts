@@ -8,6 +8,25 @@ export const t = {
   skipToContent: "דילוג לתוכן הראשי",
   accessibilityStatement: "הצהרת נגישות",
 
+  // Contact
+  contactLink: "צור קשר",
+
+  // Stats page
+  statsPage: "נתונים וסטטיסטיקה",
+  statsBooks: "ספרים",
+  statsReviews: "ביקורות",
+  statsReaders: "קוראים",
+  statsAdultsKidsSplit: (adults: number, kids: number) =>
+    `מבוגרים ${adults} · ילדים ${kids}`,
+  statsByRank: "התפלגות לפי דירוג",
+  statsByGenre: "התפלגות לפי סוגה (ספרי מבוגרים)",
+  statsMostReviewed: "הספרים עם הכי הרבה ביקורות",
+  statsActiveReaders: "הקוראים הפעילים ביותר",
+  statsByMonth: "ביקורות לפי חודש",
+  statsNoRank: "ללא דירוג",
+  statsAnonymous: "ללא שם",
+  statsEmpty: "אין עדיין נתונים להצגה.",
+
   // Footer credit
   madeWithLove: "נוצר לספרייה ב ❤️ ע״י משפחת נמיר",
 

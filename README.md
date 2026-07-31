@@ -13,7 +13,19 @@ book.
 ## Features
 
 - **Browse & search** reviews grouped by book, with colored rank badges and an
-  average rank per book.
+  average rank per book. Sorted **highest-rank first** by default (newest breaks
+  ties).
+- **Children's section (ספרי ילדים):** a separate collection of kids' reviews
+  (`/kids-reviews`) and a separate kids submission form (`/kids-write`), fed by
+  their own Google Sheet/Form, with a whimsical pastel background so the kids'
+  area feels distinct from the adults' area (ספרי מבוגרים).
+- **Genre (סוגה) filter & badges** on the adults reviews page — filter by genre,
+  and see the unique genres accumulated per book. Auto-hides when the data has no
+  genre column (e.g. the kids sheet).
+- **Stats page (נתונים וסטטיסטיקה):** a library-wide dashboard (linked from the
+  footer) with combined adults + kids totals and breakdowns — book/review/reader
+  counts, rank distribution, genre distribution, most-reviewed books, most active
+  readers, and reviews per month.
 - **Book covers** pulled from a separate published "covers" sheet, with a
   colored gradient tile as a graceful fallback when no cover exists.
 - **Embedded review form** (`/write`) that renders the Google Form in-page,
@@ -34,9 +46,12 @@ Everything you need to change lives in [`src/config.ts`](src/config.ts):
 | Field                       | What it is                                                                 |
 | --------------------------- | -------------------------------------------------------------------------- |
 | `libraryName`               | Shown in the header / home screen                                          |
-| `formUrl`                   | Public "fill the form" URL (Google Form → Send → link)                     |
-| `csvUrl`                    | Public CSV of the responses sheet (see below)                              |
+| `formUrl`                   | Public "fill the form" URL for adults (Google Form → Send → link)          |
+| `csvUrl`                    | Public CSV of the adults responses sheet (see below)                       |
+| `kidsFormUrl`               | Public "fill the form" URL for the kids section (leave empty to disable)    |
+| `kidsCsvUrl`                | Public CSV of the kids responses sheet (leave empty to disable)            |
 | `coversCsvUrl`              | Public CSV of a separate covers sheet (leave empty to disable covers)      |
+| `contactEmail`              | Library email for the footer "צור קשר" mailto link (empty to hide)         |
 | `accessibilityContactEmail` | Email shown on the accessibility statement page for reporting issues       |
 | `accessibilityWidget`       | `true`/`false` — show the self-hosted Legilo accessibility toolbar         |
 | `pageSize`                  | How many book cards to show before "load more"                             |

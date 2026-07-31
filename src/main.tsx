@@ -5,6 +5,7 @@ import App from "./App";
 import { Accessibility } from "./pages/Accessibility";
 import { Home } from "./pages/Home";
 import { Reviews } from "./pages/Reviews";
+import { Stats } from "./pages/Stats";
 import { Write } from "./pages/Write";
 import { ThemeProvider } from "./theme";
 import "./index.css";
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route path="kids-reviews" element={<Reviews variant="kids" />} />
             <Route path="write" element={<Write />} />
             <Route path="kids-write" element={<Write variant="kids" />} />
+            <Route path="stats" element={<Stats />} />
             <Route path="accessibility" element={<Accessibility />} />
           </Route>
         </Routes>

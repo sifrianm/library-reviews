@@ -96,12 +96,36 @@ export default function App() {
           </span>
           <span>{t.madeWithLove}</span>
         </span>
-        <Link
-          to="/accessibility"
-          className="text-amber-700 hover:underline dark:text-amber-400"
-        >
-          {t.accessibilityStatement}
-        </Link>
+        <span className="flex items-center gap-2">
+          <Link
+            to="/stats"
+            className="text-amber-700 hover:underline dark:text-amber-400"
+          >
+            {t.statsPage}
+          </Link>
+          <span aria-hidden className="text-stone-400 dark:text-stone-500">
+            •
+          </span>
+          <Link
+            to="/accessibility"
+            className="text-amber-700 hover:underline dark:text-amber-400"
+          >
+            {t.accessibilityStatement}
+          </Link>
+          {config.contactEmail && (
+            <>
+              <span aria-hidden className="text-stone-400 dark:text-stone-500">
+                •
+              </span>
+              <a
+                href={`mailto:${config.contactEmail}`}
+                className="text-amber-700 hover:underline dark:text-amber-400"
+              >
+                {t.contactLink}
+              </a>
+            </>
+          )}
+        </span>
       </footer>
     </div>
   );

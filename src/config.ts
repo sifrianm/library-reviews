@@ -34,6 +34,10 @@ export const config = {
   coversCsvUrl:
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn2ecMWh1sS8oo80YGQxdw8HryCTHG7CMBXsuchN_48dNV2PltK_IgPvrl3sPSo9ODtwiRdp-6eh65/pub?gid=0&single=true&output=csv",
 
+  // General contact address for the library, shown as a "contact" mailto link
+  // in the footer. Leave empty to hide the footer contact link.
+  contactEmail: "sifria2@gmail.com",
+
   // Contact for accessibility issues, shown on the accessibility statement
   // page. Fill in a real address so visitors can report problems.
   accessibilityContactEmail: "sifria2@gmail.com",
