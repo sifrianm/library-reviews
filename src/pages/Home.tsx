@@ -45,7 +45,7 @@ export function Home() {
           <FormCard formUrl={config.kidsFormUrl} to="/kids-write" emoji="🖍️" />
           <Tile
             to="/kids-reviews"
-            emoji="🧸"
+            emoji="🐉"
             title={t.browseReviews}
             sub={t.browseReviewsSub}
           />
