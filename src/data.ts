@@ -95,7 +95,10 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
   const groups = new Map<string, BookGroup>();
 
   for (const r of reviews) {
-    const key = `${r.book}\u0000${r.author}`;
+    // Group by title alone so the same book collapses even when reviewers spell
+    // the author differently (or leave it blank). The displayed author is taken
+    // from the first review that provides a non-empty one.
+    const key = normalizeTitle(r.book);
     let g = groups.get(key);
     if (!g) {
       g = {
@@ -109,6 +112,8 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
         genres: [],
       };
       groups.set(key, g);
+    } else if (!g.author && r.author) {
+      g.author = r.author;
     }
     g.reviews.push(r);
   }
