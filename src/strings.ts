@@ -38,13 +38,13 @@ export const t = {
   writeReview: "כתיבת ביקורת",
   writeReviewSub: "מילוי טופס ביקורת על ספר שקראתם",
   browseReviews: "עיון בביקורות",
-  browseReviewsKids: "עיון בביקורות — ספרי ילדים",
+  browseReviewsKids: "עיון בביקורות — ספרי ילדים ונוער",
   browseReviewsSub: "חיפוש ועיון בביקורות של הקוראים",
   formUnavailable: "קישור הטופס יתווסף בקרוב",
 
   // Home sections
   adultsSection: "ספרי מבוגרים",
-  childrenSection: "ספרי ילדים",
+  childrenSection: "ספרי ילדים ונוער",
   comingSoon: "בקרוב",
 
   // Reviews page
