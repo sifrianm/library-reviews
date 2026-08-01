@@ -257,8 +257,21 @@ export function normalizeTitle(s: string): string {
   return s.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-// Turns a Google Drive share link into an embeddable image URL. Any other URL
-// (a direct image link) is returned unchanged.
+// Defense-in-depth: only http(s) URLs are safe to feed into src/href sinks.
+// Rejects `javascript:`, `data:`, `vbscript:`, `file:`, relative paths, and
+// garbage. Never throws (a non-absolute URL makes `new URL` throw).
+export function isHttpUrl(str: string): boolean {
+  try {
+    const { protocol } = new URL(str);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// Turns a Google Drive share link into an embeddable image URL. Any other value
+// is returned only if it is a valid absolute http(s) URL; otherwise "" (no
+// cover), which the UI renders as a colored fallback tile.
 export function toImageUrl(raw: string): string {
   const url = (raw ?? "").trim();
   if (!url) return "";
@@ -267,7 +280,7 @@ export function toImageUrl(raw: string): string {
     url.match(/[?&]id=([-\w]{20,})/)?.[1] ??
     url.match(/\/d\/([-\w]{20,})/)?.[1];
   if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w600`;
-  return url;
+  return isHttpUrl(url) ? url : "";
 }
 
 function coversFromCsv(csv: string): Map<string, string> {

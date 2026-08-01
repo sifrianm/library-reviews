@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { config } from "../config";
+import { isHttpUrl } from "../data";
 import { t } from "../strings";
 
 // Google Forms renders inside an iframe when `embedded=true` is set, and it
@@ -17,6 +18,32 @@ function withFormParams(url: string, extra: Record<string, string> = {}): string
 
 export function Write({ variant = "adults" }: { variant?: "adults" | "kids" }) {
   const formUrl = variant === "kids" ? config.kidsFormUrl : config.formUrl;
+
+  // Defense-in-depth: only render a form that is a valid http(s) URL. A missing
+  // or non-http(s) URL is treated as unavailable rather than emitting a
+  // dangerous href/src.
+  if (!isHttpUrl(formUrl)) {
+    return (
+      <div>
+        <div className="mb-4">
+          <Link
+            to="/"
+            className="text-sm text-amber-700 hover:underline dark:text-amber-400"
+          >
+            {t.backHome}
+          </Link>
+        </div>
+
+        <h1 className="mb-4 text-2xl font-bold text-stone-900 dark:text-stone-50">
+          {t.writeReview}
+        </h1>
+
+        <p className="text-stone-600 dark:text-stone-300">
+          {t.formUnavailable}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
