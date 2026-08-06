@@ -83,6 +83,7 @@ export const t = {
 
   showMore: "עוד",
   showLess: "פחות",
+  readFullReview: "לקריאת הביקורת המלאה ↗",
 
   loading: "טוען ביקורות...",
   emptyState: "לא נמצאו ביקורות התואמות את החיפוש.",

@@ -8,6 +8,7 @@ export type Review = {
   genre: string;
   date: Date | null;
   rawDate: string;
+  sourceUrl?: string;
 };
 
 export type BookGroup = {

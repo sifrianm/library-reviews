@@ -62,6 +62,11 @@ function rowsFromCsv(csv: string): Review[] {
     fields.find((h) => h === HEADER_MAP.genre) ??
     fields.find((h) => h.trim().startsWith("סוגה"));
 
+  // Optional external "read the full review" link column. Matched by prefix so
+  // minor punctuation/whitespace edits to the long header don't break it. The
+  // kids sheet (and old rows) lack this column, so it resolves to "".
+  const sourceUrlCol = fields.find((h) => h.trim().startsWith("קישור"));
+
   const reviews: Review[] = [];
   parsed.data.forEach((row, i) => {
     const book = (row[HEADER_MAP.book] ?? "").trim();
@@ -70,6 +75,7 @@ function rowsFromCsv(csv: string): Review[] {
     const review = (row[HEADER_MAP.review] ?? "").trim();
     const reader = (row[HEADER_MAP.reader] ?? "").trim();
     const genre = (genreCol ? row[genreCol] : "")?.trim() ?? "";
+    const sourceUrl = (sourceUrlCol ? row[sourceUrlCol] : "")?.trim() ?? "";
     const rawDate = (row[HEADER_MAP.date] ?? "").trim();
 
     // Skip rows with no book title (blank/malformed lines).
@@ -83,6 +89,7 @@ function rowsFromCsv(csv: string): Review[] {
       review,
       reader,
       genre,
+      sourceUrl,
       rawDate,
       date: parseSheetDate(rawDate),
     });

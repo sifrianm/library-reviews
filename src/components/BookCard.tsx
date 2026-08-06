@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { BookGroup, Review } from "../types";
+import { isHttpUrl } from "../data";
 import { t } from "../strings";
 import { GenreBadge } from "./GenreBadge";
 import { AverageRankBadge, RankBadge } from "./RankBadge";
@@ -176,6 +177,19 @@ function ReviewItem({ review }: { review: Review }) {
               {expanded ? t.showLess : t.showMore}
             </button>
           )}
+        </p>
+      )}
+      {review.sourceUrl && isHttpUrl(review.sourceUrl) && (
+        <p className="mt-1.5 text-sm">
+          <a
+            href={review.sourceUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="font-medium text-amber-700 hover:underline dark:text-amber-400"
+            dir="auto"
+          >
+            {t.readFullReview}
+          </a>
         </p>
       )}
     </li>
