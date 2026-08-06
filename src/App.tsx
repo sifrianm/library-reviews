@@ -90,7 +90,18 @@ export default function App() {
 
       <footer className="flex flex-col items-center gap-1 py-4 text-center text-xs text-stone-600 dark:text-stone-400">
         <span className="flex flex-wrap items-center justify-center gap-1.5">
-          <span>{config.libraryName}</span>
+          {config.libraryUrl ? (
+            <a
+              href={config.libraryUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="text-amber-700 hover:underline dark:text-amber-400"
+            >
+              {config.libraryName}
+            </a>
+          ) : (
+            <span>{config.libraryName}</span>
+          )}
           <span aria-hidden className="text-stone-400 dark:text-stone-500">
             •
           </span>

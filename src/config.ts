@@ -6,6 +6,10 @@ export const config = {
   // Shown in the site header / home screen.
   libraryName: "ספריית נוה-מונוסון",
 
+  // The library's public homepage. Linked from the library name in the footer.
+  // Leave empty to render the name as plain text (no link).
+  libraryUrl: "https://nmonosson.agronplus.org/",
+
   // Public "fill the form" URL (Google Form -> Send -> link).
   // Leave empty until you have it; the "write a review" button will be disabled.
   formUrl:
