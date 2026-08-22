@@ -80,6 +80,7 @@ export const t = {
   reviewsCount: (n: number) => (n === 1 ? "ביקורת אחת" : `${n} ביקורות`),
   averageRank: "דירוג ממוצע",
   by: "מאת",
+  catalogLink: "לפרטים בקטלוג הספרייה ↗",
 
   showMore: "עוד",
   showLess: "פחות",

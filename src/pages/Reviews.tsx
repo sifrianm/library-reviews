@@ -5,10 +5,13 @@ import { config } from "../config";
 import {
   ADULTS_SOURCE,
   KIDS_SOURCE,
+  applyCatalogDetails,
   coverForBook,
   fetchFreshCovers,
+  fetchFreshDetails,
   fetchFreshReviews,
   getCachedCovers,
+  getCachedDetails,
   getCachedReviews,
   groupByBook,
 } from "../data";
@@ -46,6 +49,7 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
   const [covers, setCovers] = useState<Map<string, string>>(() =>
     getCachedCovers(),
   );
+  const [details, setDetails] = useState(() => getCachedDetails());
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<Scope>("all");
   const [genre, setGenre] = useState<string>("all");
@@ -79,6 +83,14 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
       .catch(() => {
         /* covers are optional */
       });
+
+    fetchFreshDetails()
+      .then((fresh) => {
+        if (fresh.size > 0) setDetails(fresh);
+      })
+      .catch(() => {
+        /* catalog details are optional */
+      });
   }
 
   // Reload whenever the source changes (e.g. navigating adults <-> kids).
@@ -87,13 +99,16 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source]);
 
-  const allGroups = useMemo(() => groupByBook(reviews), [reviews]);
+  const allGroups = useMemo(
+    () => applyCatalogDetails(groupByBook(reviews), details),
+    [reviews, details],
+  );
 
   const allGenres = useMemo(() => {
     const set = new Set<string>();
-    for (const r of reviews) if (r.genre) set.add(r.genre);
+    for (const g of allGroups) for (const ge of g.genres) if (ge) set.add(ge);
     return [...set].sort((a, b) => collator.compare(a, b));
-  }, [reviews]);
+  }, [allGroups]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -306,7 +321,7 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
               <BookCard
                 key={g.key}
                 group={g}
-                coverUrl={coverForBook(covers, g.book)}
+                coverUrl={coverForBook(covers, g.book, details)}
               />
             ))}
           </div>

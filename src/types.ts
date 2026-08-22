@@ -19,5 +19,7 @@ export type BookGroup = {
   count: number;
   avgScore: number;
   latest: number; // ms timestamp of the most recent review (0 if unknown)
-  genres: string[]; // distinct genres across this book's reviews
+  genres: string[]; // distinct genres (catalog sheet first, else reviews)
+  summary?: string;
+  catalogUrl?: string;
 };

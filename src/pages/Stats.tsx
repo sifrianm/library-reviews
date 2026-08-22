@@ -7,12 +7,15 @@ import { RANK_LEVELS } from "../config";
 import {
   ADULTS_SOURCE,
   KIDS_SOURCE,
+  applyCatalogDetails,
+  fetchFreshDetails,
   fetchFreshReviews,
+  getCachedDetails,
   getCachedReviews,
   getColdLoadTimeMs,
   groupByBook,
 } from "../data";
-import type { ReviewsSource } from "../data";
+import type { CatalogDetails, ReviewsSource } from "../data";
 import { t } from "../strings";
 import type { BookGroup, Review } from "../types";
 
@@ -28,6 +31,7 @@ const CARD =
 export function Stats() {
   const [adults, setAdults] = useState<Review[]>([]);
   const [kids, setKids] = useState<Review[]>([]);
+  const [details, setDetails] = useState(() => getCachedDetails());
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -66,6 +70,14 @@ export function Stats() {
         .catch(() => false);
     };
 
+    fetchFreshDetails()
+      .then((fresh) => {
+        if (fresh.size > 0) setDetails(fresh);
+      })
+      .catch(() => {
+        /* optional */
+      });
+
     Promise.all([
       measure(ADULTS_SOURCE, setAdults, "adults"),
       measure(KIDS_SOURCE, setKids, "kids"),
@@ -75,7 +87,10 @@ export function Stats() {
     });
   }, []);
 
-  const stats = useMemo(() => computeStats(adults, kids), [adults, kids]);
+  const stats = useMemo(
+    () => computeStats(adults, kids, details),
+    [adults, kids, details],
+  );
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -326,10 +341,14 @@ function DistroBar({
 
 type MonthRow = { key: string; label: string; count: number };
 
-function computeStats(adults: Review[], kids: Review[]) {
+function computeStats(
+  adults: Review[],
+  kids: Review[],
+  details: Map<string, CatalogDetails>,
+) {
   const all = [...adults, ...kids];
-  const adultsGroups = groupByBook(adults);
-  const kidsGroups = groupByBook(kids);
+  const adultsGroups = applyCatalogDetails(groupByBook(adults), details);
+  const kidsGroups = applyCatalogDetails(groupByBook(kids), details);
 
   // Rank distribution (best -> worst), plus an "unranked" bucket if any.
   const rankCounts = new Map<string, number>();
@@ -342,10 +361,17 @@ function computeStats(adults: Review[], kids: Review[]) {
   })).filter((row) => row.count > 0);
   const rankMax = Math.max(1, ...rankRows.map((r) => r.count));
 
-  // Genre distribution (adults only — kids reviews carry no genre).
+  // Genre distribution (adults): catalog genre when present, else review genre.
   const genreCounts = new Map<string, number>();
-  for (const r of adults) {
-    if (r.genre) genreCounts.set(r.genre, (genreCounts.get(r.genre) ?? 0) + 1);
+  for (const g of adultsGroups) {
+    const catalogGenre = details.get(g.key)?.genre;
+    if (catalogGenre) {
+      genreCounts.set(catalogGenre, (genreCounts.get(catalogGenre) ?? 0) + g.count);
+    } else {
+      for (const r of g.reviews) {
+        if (r.genre) genreCounts.set(r.genre, (genreCounts.get(r.genre) ?? 0) + 1);
+      }
+    }
   }
   const genreRows = [...genreCounts.entries()]
     .map(([value, count]) => ({ value, count }))

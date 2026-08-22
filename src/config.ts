@@ -38,6 +38,11 @@ export const config = {
   coversCsvUrl:
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vRn2ecMWh1sS8oo80YGQxdw8HryCTHG7CMBXsuchN_48dNV2PltK_IgPvrl3sPSo9ODtwiRdp-6eh65/pub?gid=0&single=true&output=csv",
 
+  // Published CSV of catalog-enriched book details (OK rows). Leave empty to
+  // skip. Author, genre, and cover from this sheet override reviews/covers.
+  detailsCsvUrl:
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT4AOW5-16txpVfulqxLf2Lq20x9RJlmjZAAv_Hq4SkFi21942YYSdGQMgJKOesUfqvrru3mw3W7Dn9/pub?gid=2007793999&single=true&output=csv",
+
   // General contact address for the library, shown as a "contact" mailto link
   // in the footer. Leave empty to hide the footer contact link.
   contactEmail: "sifria2@gmail.com",
@@ -63,6 +68,17 @@ export const config = {
 export const COVERS_HEADER_MAP = {
   book: "שם ספר",
   cover: "לינק",
+} as const;
+
+export const DETAILS_HEADER_MAP = {
+  book: "שם ספר",
+  author: "מחבר",
+  catalogId: "מזהה כותר",
+  catalogUrl: "קישור לקטלוג",
+  cover: "קישור לכריכה",
+  summary: "תקציר",
+  genre: "סוגה",
+  status: "סטטוס עדכון",
 } as const;
 
 // Maps the sheet's Hebrew column headers to internal field names. If your form

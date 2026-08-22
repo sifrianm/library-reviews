@@ -84,6 +84,10 @@ image link (a direct image URL or a Google Drive share link — Drive links are
 converted to a viewable thumbnail automatically). Titles are matched
 whitespace/case-insensitively. Leave empty to give every book its colored tile.
 
+A separate catalog-enrichment script (Google Apps Script) can fill a **new**
+sheet from the Agron catalog (cover, summary, genre) using titles from the
+reviews CSVs only. See [`scripts/catalog-enrich/README.md`](scripts/catalog-enrich/README.md).
+
 ### Accessibility toolbar
 
 The [Legilo](https://legilo.eu) widget is fully self-hosted in

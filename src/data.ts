@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { config, COVERS_HEADER_MAP, HEADER_MAP, rankByValue } from "./config";
+import { config, COVERS_HEADER_MAP, DETAILS_HEADER_MAP, HEADER_MAP, rankByValue } from "./config";
 import type { BookGroup, Review } from "./types";
 
 const COVERS_CACHE_KEY = "library-reviews-covers-v1";
@@ -142,6 +142,32 @@ export function groupByBook(reviews: Review[]): BookGroup[] {
   return [...groups.values()];
 }
 
+export type CatalogDetails = {
+  author: string;
+  coverUrl: string;
+  summary: string;
+  genre: string;
+  catalogUrl: string;
+};
+
+export function applyCatalogDetails(
+  groups: BookGroup[],
+  details: Map<string, CatalogDetails>,
+): BookGroup[] {
+  if (details.size === 0) return groups;
+  return groups.map((g) => {
+    const d = details.get(g.key);
+    if (!d) return g;
+    return {
+      ...g,
+      author: d.author || g.author,
+      genres: d.genre ? [d.genre] : g.genres,
+      summary: d.summary || undefined,
+      catalogUrl: d.catalogUrl || undefined,
+    };
+  });
+}
+
 function readCache(cacheKey: string): CacheShape | null {
   try {
     const raw = localStorage.getItem(cacheKey);
@@ -254,6 +280,7 @@ export function prefetchReviews(): void {
     });
   }
   fetchFreshCovers().catch(() => {});
+  fetchFreshDetails().catch(() => {});
 }
 
 // --- Book covers (optional second sheet) -----------------------------------
@@ -368,6 +395,100 @@ export function fetchFreshCovers(): Promise<Map<string, string>> {
 export function coverForBook(
   covers: Map<string, string>,
   book: string,
+  details?: Map<string, CatalogDetails>,
 ): string | undefined {
-  return covers.get(normalizeTitle(book));
+  const key = normalizeTitle(book);
+  const fromDetails = details?.get(key)?.coverUrl;
+  if (fromDetails) return fromDetails;
+  return covers.get(key);
+}
+
+const DETAILS_CACHE_KEY = "library-reviews-catalog-details-v1";
+
+function col_(headers: string[], exact: string, fallback: (h: string) => boolean) {
+  return headers.find((h) => h === exact) ?? headers.find(fallback);
+}
+
+function detailsFromCsv(csv: string): Map<string, CatalogDetails> {
+  const parsed = Papa.parse<Record<string, string>>(csv, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  const headers = parsed.meta.fields ?? [];
+  const bookCol = col_(headers, DETAILS_HEADER_MAP.book, (h) => h.includes("ספר"));
+  const authorCol = col_(headers, DETAILS_HEADER_MAP.author, (h) => h === "מחבר");
+  const coverCol = col_(headers, DETAILS_HEADER_MAP.cover, (h) =>
+    h.includes("כריכה"),
+  );
+  const summaryCol = col_(headers, DETAILS_HEADER_MAP.summary, (h) =>
+    h.includes("תקציר"),
+  );
+  const genreCol = col_(headers, DETAILS_HEADER_MAP.genre, (h) =>
+    h.trim().startsWith("סוגה"),
+  );
+  const catalogUrlCol = col_(headers, DETAILS_HEADER_MAP.catalogUrl, (h) =>
+    h.includes("קטלוג"),
+  );
+  const statusCol = col_(headers, DETAILS_HEADER_MAP.status, (h) =>
+    h.includes("סטטוס"),
+  );
+
+  const map = new Map<string, CatalogDetails>();
+  for (const row of parsed.data) {
+    const status = (statusCol ? row[statusCol] : "")?.trim() ?? "";
+    if (status && status !== "OK") continue;
+    const book = (bookCol ? row[bookCol] : "")?.trim() ?? "";
+    if (!book) continue;
+    const catalogUrlRaw = (catalogUrlCol ? row[catalogUrlCol] : "")?.trim() ?? "";
+    map.set(normalizeTitle(book), {
+      author: (authorCol ? row[authorCol] : "")?.trim() ?? "",
+      coverUrl: toImageUrl((coverCol ? row[coverCol] : "")?.trim() ?? ""),
+      summary: (summaryCol ? row[summaryCol] : "")?.trim() ?? "",
+      genre: (genreCol ? row[genreCol] : "")?.trim() ?? "",
+      catalogUrl: isHttpUrl(catalogUrlRaw) ? catalogUrlRaw : "",
+    });
+  }
+  return map;
+}
+
+let memDetails: Map<string, CatalogDetails> | null = null;
+let detailsInflight: Promise<Map<string, CatalogDetails>> | null = null;
+
+export function getCachedDetails(): Map<string, CatalogDetails> {
+  if (memDetails) return memDetails;
+  try {
+    const raw = localStorage.getItem(DETAILS_CACHE_KEY);
+    if (raw) {
+      memDetails = detailsFromCsv((JSON.parse(raw) as CacheShape).csv);
+      return memDetails;
+    }
+  } catch {
+    /* ignore */
+  }
+  return new Map();
+}
+
+export function fetchFreshDetails(): Promise<Map<string, CatalogDetails>> {
+  if (!config.detailsCsvUrl) return Promise.resolve(new Map());
+  if (detailsInflight) return detailsInflight;
+  detailsInflight = (async () => {
+    try {
+      const res = await fetch(config.detailsCsvUrl, { redirect: "follow" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const csv = await res.text();
+      try {
+        localStorage.setItem(
+          DETAILS_CACHE_KEY,
+          JSON.stringify({ fetchedAt: Date.now(), csv } satisfies CacheShape),
+        );
+      } catch {
+        /* best-effort */
+      }
+      memDetails = detailsFromCsv(csv);
+      return memDetails;
+    } finally {
+      detailsInflight = null;
+    }
+  })();
+  return detailsInflight;
 }

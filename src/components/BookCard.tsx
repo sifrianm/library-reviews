@@ -131,6 +131,23 @@ export function BookCard({
 
       {open && (
         <div className="border-t border-black/5 px-4 pb-4 dark:border-white/10">
+          {(group.summary || (group.catalogUrl && isHttpUrl(group.catalogUrl))) && (
+            <div className="py-3">
+              {group.summary && <SummaryText text={group.summary} />}
+              {group.catalogUrl && isHttpUrl(group.catalogUrl) && (
+                <p className="mt-1.5 text-sm">
+                  <a
+                    href={group.catalogUrl}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="font-medium text-amber-700 hover:underline dark:text-amber-400"
+                  >
+                    {t.catalogLink}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
           <ul className="divide-y divide-amber-100 dark:divide-stone-700">
             {group.reviews.map((r) => (
               <ReviewItem key={r.id} review={r} />
@@ -139,6 +156,26 @@ export function BookCard({
         </div>
       )}
     </div>
+  );
+}
+
+function SummaryText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text.length > 220;
+  const shown = isLong && !expanded ? text.slice(0, 220) + "…" : text;
+  return (
+    <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+      <span dir="auto">{shown}</span>{" "}
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="font-medium text-amber-700 hover:underline dark:text-amber-400"
+        >
+          {expanded ? t.showLess : t.showMore}
+        </button>
+      )}
+    </p>
   );
 }
 
