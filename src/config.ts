@@ -41,7 +41,7 @@ export const config = {
   // Published CSV of catalog-enriched book details (OK rows). Leave empty to
   // skip. Author, genre, and cover from this sheet override reviews/covers.
   detailsCsvUrl:
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vT4AOW5-16txpVfulqxLf2Lq20x9RJlmjZAAv_Hq4SkFi21942YYSdGQMgJKOesUfqvrru3mw3W7Dn9/pub?gid=2007793999&single=true&output=csv",
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQyscax5CWG-5YGFP660YkB7dTbXIbRFdr1vjBiGI0WVz8cay9f552vOjeHGLv_NYHj6_X7TRRTV7CQ/pub?gid=2007793999&single=true&output=csv",
 
   // General contact address for the library, shown as a "contact" mailto link
   // in the footer. Leave empty to hide the footer contact link.
