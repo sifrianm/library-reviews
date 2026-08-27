@@ -10,6 +10,7 @@ import {
   fetchFreshCovers,
   fetchFreshDetails,
   fetchFreshReviews,
+  formatAuthorDisplay,
   getCachedCovers,
   getCachedDetails,
   getCachedReviews,
@@ -117,7 +118,9 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
     if (q) {
       result = result.filter((g) => {
         const inBook = g.book.toLowerCase().includes(q);
-        const inAuthor = g.author.toLowerCase().includes(q);
+        const inAuthor =
+          g.author.toLowerCase().includes(q) ||
+          formatAuthorDisplay(g.author).toLowerCase().includes(q);
         const inReader = g.reviews.some((r) =>
           r.reader.toLowerCase().includes(q),
         );
@@ -144,7 +147,10 @@ export function Reviews({ variant = "adults" }: { variant?: "adults" | "kids" })
         case "bookAsc":
           return collator.compare(a.book, b.book);
         case "authorAsc":
-          return collator.compare(a.author, b.author);
+          return collator.compare(
+            formatAuthorDisplay(a.author),
+            formatAuthorDisplay(b.author),
+          );
         case "rankDesc": {
           const byRank = b.avgScore - a.avgScore;
           return byRank !== 0 ? byRank : b.latest - a.latest;

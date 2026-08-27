@@ -291,6 +291,17 @@ export function normalizeTitle(s: string): string {
   return s.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+// Catalog authors are often "Last, First" (קיפלינג, רודיארד). Show "First Last".
+export function formatAuthorDisplay(name: string): string {
+  const s = name.trim();
+  const comma = s.indexOf(",");
+  if (comma < 0) return s;
+  const last = s.slice(0, comma).trim();
+  const first = s.slice(comma + 1).trim();
+  if (!last || !first) return s;
+  return `${first} ${last}`;
+}
+
 // Defense-in-depth: only http(s) URLs are safe to feed into src/href sinks.
 // Rejects `javascript:`, `data:`, `vbscript:`, `file:`, relative paths, and
 // garbage. Never throws (a non-absolute URL makes `new URL` throw).

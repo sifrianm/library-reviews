@@ -10,6 +10,7 @@ import {
   applyCatalogDetails,
   fetchFreshDetails,
   fetchFreshReviews,
+  formatAuthorDisplay,
   getCachedDetails,
   getCachedReviews,
   getColdLoadTimeMs,
@@ -197,7 +198,7 @@ export function Stats() {
                           className="truncate text-xs text-stone-500 dark:text-stone-400"
                           dir="auto"
                         >
-                          {t.by} {g.author}
+                          {t.by} {formatAuthorDisplay(g.author)}
                         </div>
                       )}
                     </div>

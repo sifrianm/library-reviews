@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { BookGroup, Review } from "../types";
-import { isHttpUrl } from "../data";
+import { isHttpUrl, formatAuthorDisplay } from "../data";
 import { t } from "../strings";
 import { GenreBadge } from "./GenreBadge";
 import { AverageRankBadge, RankBadge } from "./RankBadge";
@@ -99,7 +99,7 @@ export function BookCard({
               className="mt-0.5 truncate text-sm text-stone-500 dark:text-stone-400"
               dir="auto"
             >
-              {t.by} {group.author}
+              {t.by} {formatAuthorDisplay(group.author)}
             </p>
           )}
           <div className="mt-2 flex flex-wrap items-center gap-2">
